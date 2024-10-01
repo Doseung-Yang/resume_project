@@ -33,8 +33,8 @@ const EstimateTemplate = ({ ticketId }: EstimateTemplateProps) => {
 
   const calculatePercentages = (inputAmount: number) => {
     const percentages = {
-      tenPercent: inputAmount * 0.1,
-      twentyPercent: inputAmount * 0.2,
+      tenPercent: inputAmount * 0.2,
+      twentyPercent: inputAmount * 0.4,
       fortyPercent: inputAmount * 0.4,
     };
     return percentages;

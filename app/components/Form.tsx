@@ -3,6 +3,28 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useState } from "react";
 
+interface CustomerDetails {
+  name: string;
+  contactPerson: string;
+  product: string;
+  estimateDate: string;
+}
+
+interface Item {
+  name: string;
+  unitPrice: number;
+  quantity: number;
+}
+
+interface EstimateTemplateProps {
+  amount: number;
+  customerDetails: CustomerDetails;
+  validityDate: string;
+  items: Item[];
+  toggleEdit: () => void;
+  hideEditButton: boolean;
+}
+
 // 견적서 템플릿 컴포넌트
 const EstimateTemplate = ({
   amount,
@@ -11,7 +33,7 @@ const EstimateTemplate = ({
   items,
   toggleEdit,
   hideEditButton,
-}) => {
+}: EstimateTemplateProps) => {
   return (
     <div
       id="estimate-template"
@@ -77,7 +99,7 @@ const EstimateTemplate = ({
 };
 
 // PDF 다운로드 함수
-const downloadPDF = (setHideEditButton) => {
+const downloadPDF = (setHideEditButton: (value: boolean) => void) => {
   setHideEditButton(true); // PDF 다운로드 중일 때 수정 버튼 숨기기
   const estimateElement = document.getElementById("estimate-template");
 
@@ -120,14 +142,13 @@ const MainForm = () => {
       new Date().setDate(new Date().getDate() + 10)
     ).toLocaleDateString()}`
   );
-  const [customerDetails, setCustomerDetails] = useState({
+  const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     name: "상대 고객사",
     contactPerson: "상대 고객사 담당자 성명",
     product: "견적 대상 제품",
     estimateDate: new Date().toLocaleDateString(),
   });
-  const [items] = useState([
-    // 사용하지 않는 변수 제거
+  const [items] = useState<Item[]>([
     { name: "광고 대행 비용", unitPrice: 1000000, quantity: 1 },
     { name: "지원사업 간접비", unitPrice: 2000000, quantity: 1 },
     { name: "지원사업 직접비", unitPrice: 4000000, quantity: 1 },
@@ -138,7 +159,9 @@ const MainForm = () => {
     setIsEditing(!isEditing); // 수정 모드 토글
   };
 
-  const handleCustomerInputChange = (e) => {
+  const handleCustomerInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, value } = e.target;
     setCustomerDetails((prevDetails) => ({
       ...prevDetails,
@@ -159,7 +182,7 @@ const MainForm = () => {
       const data = await res.json();
       if (data.ticket && data.ticket.custom_fields) {
         const amountField = data.ticket.custom_fields.find(
-          (field) => field.id === 6477667492761
+          (field: any) => field.id === 6477667492761
         );
         if (amountField) {
           setAmount(amountField.value);
