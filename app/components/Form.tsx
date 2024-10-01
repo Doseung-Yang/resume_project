@@ -252,7 +252,7 @@ const MainForm = () => {
       const data = await res.json();
       if (data.ticket && data.ticket.custom_fields) {
         const amountField = data.ticket.custom_fields.find(
-          (field: any) => field.id === 6477667492761
+          (field: { id: number }) => field.id === 6477667492761
         );
         if (amountField) {
           setAmount(amountField.value);
