@@ -16,6 +16,11 @@ interface Item {
   quantity: number;
 }
 
+interface CustomField {
+  id: number;
+  value: number;
+}
+
 interface EstimateTemplateProps {
   amount: number;
   customerDetails: CustomerDetails;
@@ -47,7 +52,6 @@ const EstimateTemplate = ({
         <p>견적일자 : {customerDetails.estimateDate}</p>
         <p>유효일자 : {validityDate}</p>
       </div>
-      {/* 수정 버튼 숨기기 */}
       {!hideEditButton && (
         <button
           onClick={toggleEdit}
@@ -137,7 +141,7 @@ const MainForm = () => {
   const [hideEditButton, setHideEditButton] = useState(false); // PDF 다운로드 시 수정 버튼 숨기기
   const [ticketId, setTicketId] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
-  const [validityDate] = useState<string>( // 사용하지 않는 변수 제거
+  const [validityDate] = useState<string>(
     `유효일자: ${new Date(
       new Date().setDate(new Date().getDate() + 10)
     ).toLocaleDateString()}`
@@ -182,7 +186,7 @@ const MainForm = () => {
       const data = await res.json();
       if (data.ticket && data.ticket.custom_fields) {
         const amountField = data.ticket.custom_fields.find(
-          (field: any) => field.id === 6477667492761
+          (field: CustomField) => field.id === 6477667492761
         );
         if (amountField) {
           setAmount(amountField.value);
@@ -227,7 +231,6 @@ const MainForm = () => {
         금액 가져오기
       </button>
 
-      {/* 수정 모드일 때 입력 폼 */}
       {isEditing && (
         <div className="mb-4">
           <label>수 신:</label>
@@ -307,7 +310,7 @@ const MainForm = () => {
           validityDate={validityDate}
           items={items}
           toggleEdit={toggleEdit}
-          hideEditButton={hideEditButton} // PDF 다운로드 시 수정 버튼 숨김
+          hideEditButton={hideEditButton}
         />
       )}
     </div>
