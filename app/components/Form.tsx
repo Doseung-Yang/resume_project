@@ -25,7 +25,7 @@ const EstimateTemplate = ({
         <p>견적일자 : {customerDetails.estimateDate}</p>
         <p>유효일자 : {validityDate}</p>
       </div>
-      {/* 수정 버튼은 PDF 다운로드 중이 아닐 때만 보이도록 설정 */}
+      {/* 수정 버튼 숨기기 */}
       {!hideEditButton && (
         <button
           onClick={toggleEdit}
@@ -78,31 +78,34 @@ const EstimateTemplate = ({
 
 // PDF 다운로드 함수
 const downloadPDF = (setHideEditButton) => {
-  setHideEditButton(true); // PDF 다운로드 중일 때 수정 버튼 숨김
+  setHideEditButton(true); // PDF 다운로드 중일 때 수정 버튼 숨기기
   const estimateElement = document.getElementById("estimate-template");
+
   if (estimateElement) {
-    html2canvas(estimateElement).then((canvas) => {
-      const pdf = new jsPDF();
-      const imgData = canvas.toDataURL("image/png");
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+    setTimeout(() => {
+      html2canvas(estimateElement).then((canvas) => {
+        const pdf = new jsPDF();
+        const imgData = canvas.toDataURL("image/png");
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 295; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
-      }
 
-      pdf.save("estimate.pdf");
-      setHideEditButton(false); // PDF 다운로드가 끝나면 수정 버튼 다시 표시
-    });
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save("estimate.pdf");
+        setHideEditButton(false); // PDF 다운로드가 끝나면 수정 버튼 다시 표시
+      });
+    }, 10000); // 10초 동안 버튼 숨기기
   }
 };
 
@@ -112,7 +115,7 @@ const MainForm = () => {
   const [hideEditButton, setHideEditButton] = useState(false); // PDF 다운로드 시 수정 버튼 숨기기
   const [ticketId, setTicketId] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
-  const [validityDate] = useState<string>( // 수정 불필요로 사용하지 않음
+  const [validityDate] = useState<string>( // 사용하지 않는 변수 제거
     `유효일자: ${new Date(
       new Date().setDate(new Date().getDate() + 10)
     ).toLocaleDateString()}`
@@ -124,7 +127,7 @@ const MainForm = () => {
     estimateDate: new Date().toLocaleDateString(),
   });
   const [items] = useState([
-    // 수정 불필요로 사용하지 않음
+    // 사용하지 않는 변수 제거
     { name: "광고 대행 비용", unitPrice: 1000000, quantity: 1 },
     { name: "지원사업 간접비", unitPrice: 2000000, quantity: 1 },
     { name: "지원사업 직접비", unitPrice: 4000000, quantity: 1 },
