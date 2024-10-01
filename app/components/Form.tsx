@@ -198,7 +198,12 @@ const MainForm = () => {
         throw new Error("티켓 정보가 유효하지 않습니다.");
       }
     } catch (error) {
-      alert(error.message);
+      // error가 Error 타입인지 확인
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("알 수 없는 오류가 발생했습니다.");
+      }
     }
   };
 
