@@ -200,7 +200,7 @@ const MainForm = () => {
   const [ticketId, setTicketId] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
   const [validityDate] = useState<string>(
-    `유효일자: ${new Date(
+    `${new Date(
       new Date().setDate(new Date().getDate() + 10)
     ).toLocaleDateString()}`
   );
