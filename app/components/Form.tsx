@@ -16,11 +16,6 @@ interface Item {
   quantity: number;
 }
 
-interface CustomField {
-  id: number;
-  value: number;
-}
-
 interface EstimateTemplateProps {
   amount: number;
   customerDetails: CustomerDetails;
@@ -28,7 +23,20 @@ interface EstimateTemplateProps {
   items: Item[];
   toggleEdit: () => void;
   hideEditButton: boolean;
+  templateName: string;
+  handleItemChange: (
+    index: number,
+    field: string,
+    value: string | number
+  ) => void;
+  isEditing: boolean;
 }
+
+const templates = [
+  { name: "기본 템플릿", percentages: { ten: 0.1, twenty: 0.2, forty: 0.4 } },
+  { name: "템플릿 2", percentages: { ten: 0.2, twenty: 0.3, forty: 0.5 } },
+  { name: "템플릿 3", percentages: { ten: 0.15, twenty: 0.25, forty: 0.35 } },
+];
 
 // 견적서 템플릿 컴포넌트
 const EstimateTemplate = ({
@@ -38,13 +46,18 @@ const EstimateTemplate = ({
   items,
   toggleEdit,
   hideEditButton,
+  templateName,
+  handleItemChange,
+  isEditing,
 }: EstimateTemplateProps) => {
   return (
     <div
       id="estimate-template"
       className="max-w-2xl mx-auto p-5 border border-gray-300 rounded-lg"
     >
-      <h1 className="text-2xl font-bold text-center">견적서</h1>
+      <h1 className="text-2xl font-bold text-center">
+        견적서 - {templateName}
+      </h1>
       <div className="mt-4">
         <p>수 신 : {customerDetails.name}</p>
         <p>담 당 : {customerDetails.contactPerson}</p>
@@ -72,11 +85,56 @@ const EstimateTemplate = ({
         <tbody>
           {items.map((item, index) => (
             <tr key={index}>
-              <td className="border px-4 py-2">{item.name}</td>
               <td className="border px-4 py-2">
-                {item.unitPrice.toLocaleString()} 원
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={item.name}
+                    onChange={(e) =>
+                      handleItemChange(index, "name", e.target.value)
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                  />
+                ) : (
+                  item.name
+                )}
               </td>
-              <td className="border px-4 py-2">{item.quantity}</td>
+              <td className="border px-4 py-2">
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={item.unitPrice}
+                    onChange={(e) =>
+                      handleItemChange(
+                        index,
+                        "unitPrice",
+                        parseFloat(e.target.value)
+                      )
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                  />
+                ) : (
+                  `${item.unitPrice.toLocaleString()} 원`
+                )}
+              </td>
+              <td className="border px-4 py-2">
+                {isEditing ? (
+                  <input
+                    type="number"
+                    value={item.quantity}
+                    onChange={(e) =>
+                      handleItemChange(
+                        index,
+                        "quantity",
+                        parseInt(e.target.value, 10)
+                      )
+                    }
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                  />
+                ) : (
+                  item.quantity
+                )}
+              </td>
               <td className="border px-4 py-2">
                 {(item.unitPrice * item.quantity).toLocaleString()} 원
               </td>
@@ -89,26 +147,23 @@ const EstimateTemplate = ({
         <p>부가세: {(amount * 0.1).toLocaleString()} 원</p>
         <p>제안총액: {(amount + amount * 0.1).toLocaleString()} 원</p>
       </div>
-      <div className="mt-5 text-gray-500">
-        <p>비고:</p>
-        <p>
-          교육 및 인건비는 2인에 결정 진행되며 교육작 등 제안사항 모두 와디즈의
-          비용 처리
-        </p>
-        <p>페이지 저작권은 후 수작업 여부도 별도 발생</p>
-        <p>그 외 기타 세부사항이나 협의사항은 협의에 기재</p>
-      </div>
     </div>
   );
 };
 
 // PDF 다운로드 함수
-const downloadPDF = (setHideEditButton: (value: boolean) => void) => {
+const downloadPDF = (
+  setHideEditButton: (value: boolean) => void,
+  setDownloading: (value: boolean) => void
+) => {
   setHideEditButton(true); // PDF 다운로드 중일 때 수정 버튼 숨기기
-  const estimateElement = document.getElementById("estimate-template");
+  setDownloading(true); // 다운로드 중 메시지 표시
 
-  if (estimateElement) {
-    setTimeout(() => {
+  // 10초 대기 후 PDF 다운로드 실행
+  setTimeout(() => {
+    const estimateElement = document.getElementById("estimate-template");
+
+    if (estimateElement) {
       html2canvas(estimateElement).then((canvas) => {
         const pdf = new jsPDF();
         const imgData = canvas.toDataURL("image/png");
@@ -129,16 +184,19 @@ const downloadPDF = (setHideEditButton: (value: boolean) => void) => {
         }
 
         pdf.save("estimate.pdf");
-        setHideEditButton(false); // PDF 다운로드가 끝나면 수정 버튼 다시 표시
+
+        setHideEditButton(false); // PDF 다운로드 완료 후 수정 버튼 다시 표시
+        setDownloading(false); // 다운로드 완료 후 메시지 숨기기
       });
-    }, 10000); // 10초 동안 버튼 숨기기
-  }
+    }
+  }, 10000); // 10초 동안 버튼 숨기기
 };
 
 // 메인 폼 컴포넌트
 const MainForm = () => {
   const [isEditing, setIsEditing] = useState(false); // 수정 모드 관리
   const [hideEditButton, setHideEditButton] = useState(false); // PDF 다운로드 시 수정 버튼 숨기기
+  const [downloading, setDownloading] = useState(false); // 다운로드 중 상태 관리
   const [ticketId, setTicketId] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
   const [validityDate] = useState<string>(
@@ -152,12 +210,9 @@ const MainForm = () => {
     product: "견적 대상 제품",
     estimateDate: new Date().toLocaleDateString(),
   });
-  const [items] = useState<Item[]>([
-    { name: "광고 대행 비용", unitPrice: 1000000, quantity: 1 },
-    { name: "지원사업 간접비", unitPrice: 2000000, quantity: 1 },
-    { name: "지원사업 직접비", unitPrice: 4000000, quantity: 1 },
-  ]);
+  const [items, setItems] = useState<Item[]>([]);
   const [inputAmount, setInputAmount] = useState<string>("");
+  const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
 
   const toggleEdit = () => {
     setIsEditing(!isEditing); // 수정 모드 토글
@@ -173,6 +228,17 @@ const MainForm = () => {
     }));
   };
 
+  const handleItemChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
+    const updatedItems = items.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item
+    );
+    setItems(updatedItems);
+  };
+
   const fetchAmount = async () => {
     if (!ticketId) {
       alert("티켓 번호를 입력하세요.");
@@ -186,7 +252,7 @@ const MainForm = () => {
       const data = await res.json();
       if (data.ticket && data.ticket.custom_fields) {
         const amountField = data.ticket.custom_fields.find(
-          (field: CustomField) => field.id === 6477667492761
+          (field: any) => field.id === 6477667492761
         );
         if (amountField) {
           setAmount(amountField.value);
@@ -198,7 +264,6 @@ const MainForm = () => {
         throw new Error("티켓 정보가 유효하지 않습니다.");
       }
     } catch (error) {
-      // error가 Error 타입인지 확인
       if (error instanceof Error) {
         alert(error.message);
       } else {
@@ -217,17 +282,59 @@ const MainForm = () => {
       alert("유효한 금액을 입력하세요.");
       return;
     }
+
+    // 선택한 템플릿의 비율을 사용하여 각 비용 항목 계산
+    const tenPercent = finalAmount * selectedTemplate.percentages.ten;
+    const twentyPercent = finalAmount * selectedTemplate.percentages.twenty;
+    const fortyPercent = finalAmount * selectedTemplate.percentages.forty;
+
+    setItems([
+      { name: "광고 대행 비용", unitPrice: tenPercent, quantity: 1 },
+      { name: "지원사업 간접비", unitPrice: twentyPercent, quantity: 1 },
+      { name: "지원사업 직접비", unitPrice: fortyPercent, quantity: 1 },
+    ]);
+
     setAmount(finalAmount);
   };
 
   return (
     <div>
+      {/* 다운로드 중 메시지 표시 */}
+      {downloading && (
+        <div className="fixed inset-0 bg-gray-100 bg-opacity-75 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32 mb-4"></div>
+            <h2 className="text-xl font-semibold">다운로드 중...</h2>
+            <p className="mt-4 text-green-600">곧 완료됩니다!</p>
+          </div>
+        </div>
+      )}
+
+      {/* 템플릿 선택 및 다운로드 버튼 */}
+      <label htmlFor="template-select">템플릿 선택:</label>
+      <select
+        id="template-select"
+        onChange={(e) => {
+          const selected = templates.find(
+            (template) => template.name === e.target.value
+          );
+          if (selected) setSelectedTemplate(selected);
+        }}
+        className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+      >
+        {templates.map((template, index) => (
+          <option key={index} value={template.name}>
+            {template.name}
+          </option>
+        ))}
+      </select>
+
       <input
         type="text"
         value={ticketId}
         onChange={(e) => setTicketId(e.target.value)}
         placeholder="티켓 번호 입력"
-        className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+        className="block w-full px-3 py-2 border border-gray-300 rounded-md mt-4"
       />
       <button
         onClick={fetchAmount}
@@ -302,7 +409,7 @@ const MainForm = () => {
       </button>
 
       <button
-        onClick={() => downloadPDF(setHideEditButton)}
+        onClick={() => downloadPDF(setHideEditButton, setDownloading)}
         className="mt-4 bg-green-500 text-white py-2 px-4 rounded"
       >
         PDF 다운로드
@@ -316,6 +423,9 @@ const MainForm = () => {
           items={items}
           toggleEdit={toggleEdit}
           hideEditButton={hideEditButton}
+          templateName={selectedTemplate.name}
+          handleItemChange={handleItemChange}
+          isEditing={isEditing}
         />
       )}
     </div>
