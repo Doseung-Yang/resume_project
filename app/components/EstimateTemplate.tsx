@@ -1,7 +1,5 @@
-// EstimateTemplate.tsx
-
+import jsPDF from "jspdf"; // PDF 생성
 import { useEffect, useState } from "react";
-import { fetchTicketAmount } from "../api/zendesk"; // Zendesk API 호출 함수
 
 interface EstimateTemplateProps {
   ticketId: string; // Zendesk 티켓 ID
@@ -14,8 +12,13 @@ const EstimateTemplate = ({ ticketId }: EstimateTemplateProps) => {
   useEffect(() => {
     const fetchAmount = async () => {
       try {
-        const fetchedAmount = await fetchTicketAmount(ticketId); // 티켓에서 금액을 가져옵니다.
-        setAmount(fetchedAmount);
+        // API 라우트로 HTTP 요청을 보냅니다.
+        const response = await fetch(`/api/zendesk?ticketId=${ticketId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch ticket amount");
+        }
+        const data = await response.json();
+        setAmount(data.amount); // 가져온 금액을 상태에 저장
       } catch (error) {
         console.error("Error fetching ticket amount:", error);
       }
@@ -25,7 +28,7 @@ const EstimateTemplate = ({ ticketId }: EstimateTemplateProps) => {
   }, [ticketId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserInputAmount(e.target.value);
+    setUserInputAmount(Number(e.target.value));
   };
 
   const calculatePercentages = (inputAmount: number) => {
