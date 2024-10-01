@@ -10,7 +10,7 @@ const EstimateTemplate = ({
   validityDate,
   items,
   toggleEdit,
-  isPDF,
+  hideEditButton,
 }) => {
   return (
     <div
@@ -25,8 +25,8 @@ const EstimateTemplate = ({
         <p>견적일자 : {customerDetails.estimateDate}</p>
         <p>유효일자 : {validityDate}</p>
       </div>
-      {/* isPDF가 true일 때 수정 버튼을 숨김 */}
-      {!isPDF && (
+      {/* 수정 버튼은 PDF 다운로드 중이 아닐 때만 보이도록 설정 */}
+      {!hideEditButton && (
         <button
           onClick={toggleEdit}
           className="bg-blue-500 text-white py-2 px-4 rounded mb-4"
@@ -77,7 +77,8 @@ const EstimateTemplate = ({
 };
 
 // PDF 다운로드 함수
-const downloadPDF = () => {
+const downloadPDF = (setHideEditButton) => {
+  setHideEditButton(true); // PDF 다운로드 중일 때 수정 버튼 숨김
   const estimateElement = document.getElementById("estimate-template");
   if (estimateElement) {
     html2canvas(estimateElement).then((canvas) => {
@@ -100,14 +101,15 @@ const downloadPDF = () => {
       }
 
       pdf.save("estimate.pdf");
+      setHideEditButton(false); // PDF 다운로드가 끝나면 수정 버튼 다시 표시
     });
   }
 };
 
 // 메인 폼 컴포넌트
 const MainForm = () => {
-  const [isEditing, setIsEditing] = useState(false); // 수정 모드 상태 관리
-  const [isPDF, setIsPDF] = useState(false); // PDF 다운로드 여부 상태
+  const [isEditing, setIsEditing] = useState(false); // 수정 모드 관리
+  const [hideEditButton, setHideEditButton] = useState(false); // PDF 다운로드 시 수정 버튼 숨기기
   const [ticketId, setTicketId] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
   const [validityDate, setValidityDate] = useState<string>(
@@ -182,14 +184,6 @@ const MainForm = () => {
     setAmount(finalAmount);
   };
 
-  const handleDownloadPDF = () => {
-    setIsPDF(true); // PDF 모드로 설정
-    setTimeout(() => {
-      downloadPDF();
-      setIsPDF(false); // PDF 생성 후 다시 일반 모드로 전환
-    }, 500);
-  };
-
   return (
     <div>
       <input
@@ -205,6 +199,50 @@ const MainForm = () => {
       >
         금액 가져오기
       </button>
+
+      {/* 수정 모드일 때 입력 폼 */}
+      {isEditing && (
+        <div className="mb-4">
+          <label>수 신:</label>
+          <input
+            type="text"
+            name="name"
+            value={customerDetails.name}
+            onChange={handleCustomerInputChange}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <label>담 당:</label>
+          <input
+            type="text"
+            name="contactPerson"
+            value={customerDetails.contactPerson}
+            onChange={handleCustomerInputChange}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <label>제 품:</label>
+          <input
+            type="text"
+            name="product"
+            value={customerDetails.product}
+            onChange={handleCustomerInputChange}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <label>견적일자:</label>
+          <input
+            type="text"
+            name="estimateDate"
+            value={customerDetails.estimateDate}
+            onChange={handleCustomerInputChange}
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md"
+          />
+          <button
+            onClick={toggleEdit}
+            className="mt-4 bg-green-500 text-white py-2 px-4 rounded"
+          >
+            저장
+          </button>
+        </div>
+      )}
 
       <label
         htmlFor="input-amount"
@@ -229,7 +267,7 @@ const MainForm = () => {
       </button>
 
       <button
-        onClick={handleDownloadPDF}
+        onClick={() => downloadPDF(setHideEditButton)}
         className="mt-4 bg-green-500 text-white py-2 px-4 rounded"
       >
         PDF 다운로드
@@ -242,7 +280,7 @@ const MainForm = () => {
           validityDate={validityDate}
           items={items}
           toggleEdit={toggleEdit}
-          isPDF={isPDF} // PDF 모드 여부 전달
+          hideEditButton={hideEditButton} // PDF 다운로드 시 수정 버튼 숨김
         />
       )}
     </div>
