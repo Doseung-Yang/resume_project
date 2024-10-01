@@ -112,7 +112,7 @@ const MainForm = () => {
   const [hideEditButton, setHideEditButton] = useState(false); // PDF 다운로드 시 수정 버튼 숨기기
   const [ticketId, setTicketId] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
-  const [validityDate, setValidityDate] = useState<string>(
+  const [validityDate] = useState<string>( // 수정 불필요로 사용하지 않음
     `유효일자: ${new Date(
       new Date().setDate(new Date().getDate() + 10)
     ).toLocaleDateString()}`
@@ -123,7 +123,8 @@ const MainForm = () => {
     product: "견적 대상 제품",
     estimateDate: new Date().toLocaleDateString(),
   });
-  const [items, setItems] = useState([
+  const [items] = useState([
+    // 수정 불필요로 사용하지 않음
     { name: "광고 대행 비용", unitPrice: 1000000, quantity: 1 },
     { name: "지원사업 간접비", unitPrice: 2000000, quantity: 1 },
     { name: "지원사업 직접비", unitPrice: 4000000, quantity: 1 },
