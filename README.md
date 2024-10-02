@@ -62,16 +62,16 @@ npm run dev
 환경 변수 설정
 젠데스크 API 연동을 위해 환경 변수를 설정해야 합니다. .env.local 파일을 프로젝트 루트 디렉토리에 추가하고 아래와 같이 설정하세요:
 
-makefile
+makefile(.env.local) 환경 변수 설정
 코드 복사
-ZENDESK_API_TOKEN=your_zendesk_api_token
-ZENDESK_SUBDOMAIN=your_zendesk_subdomain
-ZENDESK_EMAIL=your_email@example.com
-개선 사항
-견적 항목의 더 많은 커스터마이징 기능 추가
-PDF 디자인 및 템플릿 확장
-기여 방법
-이 프로젝트를 Fork합니다.
-새 브랜치에서 작업하세요 (git checkout -b feature/your-feature).
-커밋 후 푸시하세요 (git commit -am 'Add some feature').
-Pull Request를 생성하세요.
+- ZENDESK_API_TOKEN=your_zendesk_api_token
+- ZENDESK_SUBDOMAIN=your_zendesk_subdomain
+- ZENDESK_EMAIL=your_email@example.com
+# 개선 사항
+- 견적 항목의 더 많은 커스터마이징 기능 추가
+- PDF 디자인 및 템플릿 확장
+# 기여 방법
+- 프로젝트를 Fork합니다.
+- 새 브랜치에서 작업하세요 (git checkout -b feature/your-feature).
+- 커밋 후 푸시하세요 (git commit -am 'Add some feature').
+- Pull Request를 생성하세요.
