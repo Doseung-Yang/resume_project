@@ -15,6 +15,9 @@
 
 ---
 
+<img width="760" alt="스크린샷 2024-10-02 오후 3 42 10" src="https://github.com/user-attachments/assets/3d130057-e67e-44b5-a673-86da32dc6636">
+
+
 ## 사용된 기술 스택
 
 ### 프론트엔드
