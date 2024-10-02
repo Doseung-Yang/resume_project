@@ -143,7 +143,7 @@ const EstimateTemplate = ({
         </tbody>
       </table>
       <div className="mt-5 text-gray-500">
-        <p>금액합계: {amount.toLocaleString()} 원</p>
+        <p>금액: {amount.toLocaleString()} 원</p>
         <p>부가세: {(amount * 0.1).toLocaleString()} 원</p>
         <p>제안총액: {(amount + amount * 0.1).toLocaleString()} 원</p>
       </div>
@@ -340,8 +340,12 @@ const MainForm = () => {
         onClick={fetchAmount}
         className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
       >
-        금액 가져오기
+        젠데스크 연동
       </button>
+      <p className="mt-4 text-gray-500">
+        젠데스크 티켓 연동을 사용했을 경우 아래 <b>견적서 생성</b> 버튼을 반드시
+        클릭해 주세요
+      </p>
 
       {isEditing && (
         <div className="mb-4">
@@ -400,21 +404,21 @@ const MainForm = () => {
         placeholder="금액 입력"
         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
       />
+      <div className="flex space-x-4">
+        <button
+          onClick={createEstimate}
+          className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
+        >
+          견적서 생성
+        </button>
 
-      <button
-        onClick={createEstimate}
-        className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
-      >
-        견적서 생성
-      </button>
-
-      <button
-        onClick={() => downloadPDF(setHideEditButton, setDownloading)}
-        className="mt-4 bg-green-500 text-white py-2 px-4 rounded"
-      >
-        PDF 다운로드
-      </button>
-
+        <button
+          onClick={() => downloadPDF(setHideEditButton, setDownloading)}
+          className="mt-4 bg-green-500 text-white py-2 px-4 rounded"
+        >
+          PDF 다운로드
+        </button>
+      </div>
       {amount !== null && (
         <EstimateTemplate
           amount={amount}
